@@ -1,0 +1,20 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # 1. Redirects /index.php to /
+  RewriteCond %{THE_REQUEST} /index\.php [NC]
+  RewriteRule ^index\.php$ / [R=301,L,NC]
+
+  # 2. Redirects /file.php to /file
+  RewriteCond %{THE_REQUEST} \s/+(.+?)\.php[\s?] [NC]
+  RewriteRule ^ /%1 [R=301,L]
+
+  # 3. Silently rewrites /file to /file.php
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^([^/]+)/?$ $1.php [L]
+
+  # 4. Silently rewrites / to /index.php
+  RewriteRule ^$ index.php [L]
+</IfModule>
