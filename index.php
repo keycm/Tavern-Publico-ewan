@@ -70,8 +70,9 @@ if ($result_testimonials && $result_testimonials->num_rows > 0) {
     <link rel="stylesheet" href="CSS/main.css">
     <link rel="stylesheet" href="CSS/dark-theme.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Mada:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs.min.css">
     
     <style>
         /* --- INLINED RESPONSIVE HERO SECTION STYLES --- */
@@ -422,7 +423,7 @@ if ($result_testimonials && $result_testimonials->num_rows > 0) {
                                     <a href="menu.php" class="btn btn-outline-white">View Menu</a>
                                     <?php
                                     if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
-                                        echo '<a href="reserve.php" class="btn btn-secondary">Reserve Now</a>';
+                                        echo '<a href="reserve.php" class="btn btn-secondary tour-reserve-btn">Reserve Now</a>';
                                     } else {
                                         echo '<button class="btn btn-secondary signin-button">Reserve Now</button>';
                                     }
@@ -448,7 +449,7 @@ if ($result_testimonials && $result_testimonials->num_rows > 0) {
                                 <a href="menu.php" class="btn btn-outline-white">View Menu</a>
                                 <?php
                                 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
-                                    echo '<a href="reserve.php" class="btn btn-secondary">Reserve Now</a>';
+                                    echo '<a href="reserve.php" class="btn btn-secondary tour-reserve-btn">Reserve Now</a>';
                                 } else {
                                     echo '<button class="btn btn-secondary signin-button">Reserve Now</button>';
                                 }
@@ -672,6 +673,65 @@ if ($result_testimonials && $result_testimonials->num_rows > 0) {
     <?php include 'partials/Signin-Signup.php'; ?>
     <script src="JS/theme-switcher.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
+    <script>
+        <?php if (isset($_SESSION['show_tour']) && $_SESSION['show_tour'] === true): ?>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to mark tour as seen in backend via ajax
+            function markTourSeen() {
+                fetch('complete_tour.php', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => { console.log('Tour completed/skipped'); })
+                    .catch(err => console.error(err));
+            }
+
+            // We wrap this in a timeout to let the sliders and headers render fully
+            setTimeout(() => {
+                const intro = introJs();
+                
+                // Set the specific elements you want to highlight for the user
+                intro.setOptions({
+                    steps: [
+                        {
+                            title: 'Welcome to Tavern Publico! 🎉',
+                            intro: 'Let us show you around quickly so you know how to make your first reservation.'
+                        },
+                        {
+                            element: document.querySelector('.tour-reserve-btn'),
+                            title: 'Step 1: Reserve Now',
+                            intro: 'Click here to easily pick a date, time, and table for your visit.',
+                            position: 'bottom'
+                        },
+                        {
+                            element: document.querySelector('.main-nav a[href="/menu"]'),
+                            title: 'Step 2: Check the Menu',
+                            intro: 'Browse our crafted food and drinks ahead of time so you know what you crave!',
+                            position: 'bottom'
+                        },
+                        {
+                            element: document.querySelector('#profileBtn'),
+                            title: 'Step 3: Your Profile',
+                            intro: 'Click here anytime to manage your account, check reservations, and see updates from us.',
+                            position: 'left'
+                        }
+                    ],
+                    showProgress: true,
+                    showBullets: false,
+                    overlayOpacity: 0.6,
+                    exitOnOverlayClick: false,
+                    disableInteraction: true // Forces them to use 'Next' rather than accidentally clicking away
+                });
+
+                // Attach complete and exit events to update DB flag
+                intro.oncomplete(markTourSeen);
+                intro.onexit(markTourSeen);
+
+                // Start the tour
+                intro.start();
+            }, 800);
+        });
+        <?php endif; ?>
+    </script>
     <script>
         // --- NEW FLIP LOGIC FOR SPECIALTIES ---
         function toggleFlip(event, clickedCard) {
